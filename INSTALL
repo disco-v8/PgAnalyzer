@@ -1,0 +1,43 @@
+
+0. Quick instal
+
+    1) Download and compile, link.
+
+    $ git clone https://github.com/disco-v8/PgAnalyzer.git
+    $ cd PgAnalyzer
+
+    $ autoheader
+    $ aclocal
+    $ automake --add-missing --copy
+    $ autoconf
+
+    $ make clean
+    $ ./configure --prefix=/usr
+    $ make
+
+    2) Make PID, SockFile, Log's directorys.
+
+    $ mkdir /var/run/EvServer/
+    $ chown userid.groupid /var/run/EvServer/
+    $ mkdir /var/log/EvServer/
+    $ chown userid.groupid /var/log/EvServer/
+
+    3) Edit INI file, and run.
+
+    $ tail -F /var/log/EvServer/EvServer.log
+
+1. Usage
+
+    $ ./evs_pganalyzer [/PATH/TO/evserver.ini]
+    $ tail -F /var/log/EvServer/EvServer.log
+
+If you don't specify a "evserver.ini", it will only listen on UNIX domain sockets.
+
+2. How to connect to PostgreSQL via PgAnalyzer
+
+    $ psql test_db -U testuser -p 10080 -h testserver
+
+3. Thanks
+
+libev, OpenSSL, VSCode :-)
+	...and everyone!
