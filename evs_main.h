@@ -160,6 +160,7 @@ struct EVS_db_t {                                           // データベー�
 
 struct EVS_ev_server_t {                                    // コールバック関数内でソケットのファイルディスクリプタも知りたいので拡張した構造体を宣言する、こちらはサーバー用
 	ev_io           io_watcher;                             // libevのev_io、これをev_io_init()＆ev_io_start()に渡す
+	ev_tstamp       last_activity;                          // 最終アクティブ日時(監視対象が最後にアクティブとなった=タイマー更新した日時)
 	int             socket_fd;                              // socket_fd、コールバック関数内でstruct ev_io*で渡される変数のポインタをEVS_ev_server_t*に型変換することで参照する
 	int             ssl_support;                            // SSL/TLS対応状態(0:非対応、1:SSL/TLS対応)
 	union {                                                 // ソケットアドレス構造体の共用体
