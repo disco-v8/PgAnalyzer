@@ -4,7 +4,8 @@
 //     Base process of Server and Client.
 //
 // Version:
-//     0.0.16 Published on GitHUB, 1st Version.
+//     0.0.16 Published on GitHUB.
+//     0.0.17 Fix Timeout.
 //
 // Program:
 //     Takeshi Kaburagi/MyDNS.JP    https://www.fvg-on.net/
