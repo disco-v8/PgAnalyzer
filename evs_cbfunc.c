@@ -24,9 +24,7 @@
 // 定数宣言
 // --------------------------------
 #define EVS_idle_message_check_interval     0.003                       // アイドルイベント時のメッセージのチェック間隔
-/* アイドルイベントはあくまでログメッセージ出力用なので、無通信タイムアウトチェックは、タイマーなどでしないといけない
-#define EVS_idle_client_check_interval      0.3                         // クライアントの接続チェック間隔
-*/
+
 // --------------------------------
 // 型宣言
 // --------------------------------
@@ -182,57 +180,7 @@ static void CB_idle_message(struct ev_loop* loop, struct ev_idle *watcher, int r
 		}
 	}
 }
-/*
-// --------------------------------
-// アイドルイベント(クライアントタイムアウト処理)のコールバック処理
-// --------------------------------
-static void CB_idle_client(struct ev_loop* loop, struct ev_idle *watcher, int revents)
-{
-	char                            log_str[MAX_LOG_LENGTH];
 
-	struct EVS_ev_server_t          *server_watcher = (struct EVS_ev_server_t *)watcher;        // サーバー別設定用構造体ポインタ
-	struct EVS_ev_client_t          *client_watcher;                                            // クライアント別設定用構造体ポインタ
-
-	// --------------------------------
-	// アイドル時に毎回毎回クライアントとの接続について処理するのはアホなので、0.3秒以上経過したらに検査するようにする。
-	// --------------------------------
-	if ((EVS_idle_client_check_lasttime - ev_now(loop) + EVS_idle_client_check_interval) < 0)
-	{
-		// --------------------------------
-		// クライアント別クローズ処理
-		// --------------------------------
-		// クライアント用テールキューからポート情報を取得して全て処理
-		TAILQ_FOREACH (client_watcher, &EVS_client_tailq, entries)
-		{
-			// 無通信タイマーの経過時間がすでにタイムアウトしていたら
-			if ((client_watcher->last_activity + EVS_config.nocommunication_timeout) < ev_now(loop))
-			{
-				snprintf(log_str, MAX_LOG_LENGTH, "%s(fd=%d): Timeout!!!\n", __func__, client_watcher->socket_fd);
-				logging(LOG_QUEUEING, LOGLEVEL_INFO, NULL, NULL, NULL, log_str, strlen(log_str));
-				// ----------------
-				// クライアント接続終了処理(イベントの停止、クライアントキューからの削除、SSL接続情報開放、ソケットクローズ、クライアント情報開放)
-				// ----------------
-				CLOSE_client(loop, (struct ev_io *)client_watcher, revents);
-			}
-		}
-		// イベントループの日時を現在の日時に更新
-		ev_now_update(loop);
-		// 最終アイドルチェック日時を更新
-		EVS_idle_client_check_lasttime = ev_now(loop);
-	}
-
-	// もし接続クライアント数が0だったら
-	if (EVS_connect_num == 0)
-	{
-		snprintf(log_str, MAX_LOG_LENGTH, "%s(): EVS_connect_num == 0. ev_idle_stop()\n", __func__);
-		logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
-		// このアイドルイベントを停止する(再びクライアントからの接続があれば(=acceptがあれば)開始する)
-		// ※この命令は、アイドルイベントのコールバック関数の最後で呼ばないと、これの後ろの処理が行われないので注意!!
-		ev_idle_stop(loop, watcher);
-	}
-
-}
-*/
 // ----------------
 // タイマーイベントのコールバック処理
 // ----------------
@@ -241,8 +189,11 @@ static void CB_timeout(struct ev_loop* loop, struct ev_timer *watcher, int reven
 	char                            log_str[MAX_LOG_LENGTH];
 
 	struct EVS_timer_t              *this_timeout;                      // タイマー別構造体ポインタ
+	struct EVS_ev_client_t          *client_watcher;                    // クライアント別設定用構造体ポインタ
+	struct EVS_ev_pgsql_t           *pgsql_watcher;                     // PostgreSQL別設定用構造体ポインタ
+
 	ev_tstamp                       nowtime = 0.;                       // タイムアウト日時
-	
+
 	// イベントループの日時を現在の日時に更新
 	ev_now_update(loop);
 	nowtime = ev_now(loop);
@@ -250,6 +201,9 @@ static void CB_timeout(struct ev_loop* loop, struct ev_timer *watcher, int reven
 	snprintf(log_str, MAX_LOG_LENGTH, "%s(): Timeout check start! ev_now=%.0f\n", __func__, nowtime);
 	logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
 
+	// --------------------------------
+	// タイマー別処理
+	// --------------------------------
 	// タイマー用テールキューに登録されているタイマーを確認
 	TAILQ_FOREACH (this_timeout, &EVS_timer_tailq, entries)
 	{
@@ -265,6 +219,51 @@ static void CB_timeout(struct ev_loop* loop, struct ev_timer *watcher, int reven
 			logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
 		}
 	}
+	// ----------------
+	// 無通信タイムアウトチェックをする(=1:有効)なら
+	// ----------------
+	if (EVS_config.nocommunication_check == 1)
+	{
+		// --------------------------------
+		// クライアント別クローズ処理
+		// --------------------------------
+		// クライアント用テールキューからポート情報を取得して全て処理
+		TAILQ_FOREACH (client_watcher, &EVS_client_tailq, entries)
+		{
+			// 無通信タイマーの経過時間がすでにタイムアウトしていたら
+			if ((client_watcher->last_activity + EVS_config.nocommunication_timeout) < nowtime)
+			{
+				snprintf(log_str, MAX_LOG_LENGTH, "%s(fd=%d): Client Timeout!!!\n", __func__, client_watcher->socket_fd);
+				logging(LOG_QUEUEING, LOGLEVEL_INFO, NULL, NULL, NULL, log_str, strlen(log_str));
+				// ----------------
+				// クライアント接続終了処理(イベントの停止、クライアントキューからの削除、SSL接続情報開放、ソケットクローズ、クライアント情報開放)
+				// ----------------
+				CLOSE_client(loop, (struct ev_io *)client_watcher, revents);
+			}
+		}
+		// --------------------------------
+		// PostgreSQL別クローズ処理
+		// --------------------------------
+		// PostgreSQL用テールキューからポート情報を取得して全て処理
+		TAILQ_FOREACH (pgsql_watcher, &EVS_pgsql_tailq, entries)
+		{
+			// 無通信タイマーの経過時間がすでにタイムアウトしていたら
+			if ((pgsql_watcher->last_activity + EVS_config.nocommunication_timeout) < nowtime)
+			{
+				snprintf(log_str, MAX_LOG_LENGTH, "%s(fd=%d): PostgreSQL Timeout!!!\n", __func__, pgsql_watcher->socket_fd);
+				logging(LOG_QUEUEING, LOGLEVEL_INFO, NULL, NULL, NULL, log_str, strlen(log_str));
+				// ----------------
+				// PostgreSQL接続終了処理(イベントの停止、PostgreSQLキューからの削除、SSL接続情報開放、ソケットクローズ、PostgreSQL情報開放)
+				// ----------------
+				CLOSE_pgsql(loop, (struct ev_io *)pgsql_watcher, revents);
+			}
+		}
+	}
+	// イベントループの日時を現在の日時に更新
+	ev_now_update(loop);
+	// 最終アイドルチェック日時を更新
+	EVS_idle_client_check_lasttime = nowtime;
+
 	// ----------------
 	// タイマーオブジェクトに対して、タイムアウト確認間隔(timer_checkintval秒)、そして繰り返し回数(0回)を設定する(つまり次のタイマーを設定している)
 	// ----------------
@@ -302,15 +301,6 @@ static void CB_recv(struct ev_loop* loop, struct ev_io *watcher, int revents)
 		this_client->last_activity = ev_now(loop);                      // 最終アクティブ日時(監視対象が最後にアクティブとなった日時)を設定する
 		snprintf(log_str, MAX_LOG_LENGTH, "%s(fd=%d): last_activity=%.0f\n", __func__, this_client->socket_fd, this_client->last_activity);
 		logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
-/* アイドルイベントはあくまでログメッセージ出力用なので、無通信タイムアウトチェックは、タイマーなどでしないといけない
-		// ----------------
-		// アイドルイベント開始処理
-		// ----------------
-		// ev_idle_start()自体は、accept()とrecv()系イベントで呼び出す
-		ev_idle_start(loop, &idle_client_watcher);
-		snprintf(log_str, MAX_LOG_LENGTH, "%s(): ev_idle_start(idle_client_watcher): OK.\n", __func__);
-		logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
-*/
 	}
 
 	// ----------------
@@ -613,15 +603,6 @@ static void CB_accept_ipv6(struct ev_loop* loop, struct EVS_ev_server_t * server
 		client_watcher->last_activity = ev_now(loop);                       // 最終アクティブ日時(監視対象が最後にアクティブとなった日時)を設定する
 		snprintf(log_str, MAX_LOG_LENGTH, "%s(fd=%d): last_activity=%.0f\n", __func__, client_watcher->socket_fd, client_watcher->last_activity);
 		logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
-/* アイドルイベントはあくまでログメッセージ出力用なので、無通信タイムアウトチェックは、タイマーなどでしないといけない
-		// ----------------
-		// アイドルイベント開始処理
-		// ----------------
-		// ev_idle_start()自体は、accept()とrecv()系イベントで呼び出す
-		ev_idle_start(loop, &idle_client_watcher);
-		snprintf(log_str, MAX_LOG_LENGTH, "%s(): ev_idle_start(idle_client_watcher): OK.\n", __func__);
-		logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
-*/
 	}
 
 	// --------------------------------
@@ -731,15 +712,6 @@ static void CB_accept_ipv4(struct ev_loop* loop, struct EVS_ev_server_t * server
 		client_watcher->last_activity = ev_now(loop);                       // 最終アクティブ日時(監視対象が最後にアクティブとなった日時)を設定する
 		snprintf(log_str, MAX_LOG_LENGTH, "%s(fd=%d): last_activity=%.0f\n", __func__, client_watcher->socket_fd, client_watcher->last_activity);
 		logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
-/* アイドルイベントはあくまでログメッセージ出力用なので、無通信タイムアウトチェックは、タイマーなどでしないといけない
-		// ----------------
-		// アイドルイベント開始処理
-		// ----------------
-		// ev_idle_start()自体は、accept()とrecv()系イベントで呼び出す
-		ev_idle_start(loop, &idle_client_watcher);
-		snprintf(log_str, MAX_LOG_LENGTH, "%s(): ev_idle_start(idle_client_watcher): OK.\n", __func__);
-		logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
-*/
 	}
 
 	// --------------------------------
@@ -829,15 +801,6 @@ static void CB_accept_unix(struct ev_loop* loop, struct EVS_ev_server_t * server
 		client_watcher->last_activity = ev_now(loop);                       // 最終アクティブ日時(監視対象が最後にアクティブとなった=タイマー更新した日時)を設定する
 		snprintf(log_str, MAX_LOG_LENGTH, "%s(fd=%d): last_activity=%.0f\n", __func__, client_watcher->socket_fd, client_watcher->last_activity);
 		logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
-/* アイドルイベントはあくまでログメッセージ出力用なので、無通信タイムアウトチェックは、タイマーなどでしないといけない
-		// ----------------
-		// アイドルイベント開始処理
-		// ----------------
-		// ev_idle_start()自体は、accept()とrecv()系イベントで呼び出す
-		ev_idle_start(loop, &idle_client_watcher);
-		snprintf(log_str, MAX_LOG_LENGTH, "%s(): ev_idle_start(idle_client_watcher): OK.\n", __func__);
-		logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
-*/
 	}
 
 	// --------------------------------
