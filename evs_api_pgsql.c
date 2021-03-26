@@ -858,14 +858,6 @@ static void CB_pgsqlrecv(struct ev_loop* loop, struct ev_io *watcher, int revent
 		this_pgsql->last_activity = ev_now(loop);                       // 最終アクティブ日時(監視対象が最後にアクティブとなった日時)を設定する
 		snprintf(log_str, MAX_LOG_LENGTH, "%s(pgsql=%d): last_activity=%.0f\n", __func__, this_pgsql->socket_fd, this_pgsql->last_activity);
 		logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
-/* アイドルイベントはあくまでログメッセージ出力用なので、無通信タイムアウトチェックは、タイマーなどでしないといけない
-		// ----------------
-		// アイドルイベント開始処理                                                 ←PostgreSQLについてのタイムアウトを実装するなら、別イベントループを生成しないとダメだョ
-		// ----------------
-		// ev_idle_start()自体は、accept()とrecv()系イベントで呼び出す
-		ev_idle_start(loop, &idle_pgsql_watcher);
-		snprintf(log_str, MAX_LOG_LENGTH, "%s(): ev_idle_start(idle_pgsql_watcher): OK.\n", __func__);
-		logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
 	}
 */
 	// ----------------
