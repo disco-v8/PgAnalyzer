@@ -730,9 +730,9 @@ int INIT_config_default(void)
 	logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
 
 	// ----------------
-	// タイマーイベント確認間隔(秒)を60秒に設定
+	// タイマーイベント確認間隔(秒)を1秒に設定
 	// ----------------
-	EVS_config.timer_checkintval = 60.;
+	EVS_config.timer_checkintval = 1.;
 	snprintf(log_str, MAX_LOG_LENGTH, "%s(): Timeout Check Interval=%f\n", __func__, EVS_config.timer_checkintval);
 	logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
 
