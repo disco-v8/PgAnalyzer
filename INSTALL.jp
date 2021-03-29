@@ -1,5 +1,5 @@
 
-0. ����ѥ��롦���󥹥ȡ�����ˡ
+0. コンパイル・インストール方法
 
     1) Download and compile, link.
 
@@ -22,28 +22,28 @@
     $ mkdir /var/log/EvServer/
     $ chown userid.groupid /var/log/EvServer/
 
-1. �Ȥ���
+1. 使い方
 
-�Ȥ����Ϥ����äƴ�ñ�Ǥ���
+使い方はいたって簡単です。
 
-PostgreSQL�򿨤ä����Ȥ�����ͤʤ顢����ե������ߤ�а�̣��ʬ����Ȼפ��ޤ���
+PostgreSQLを触ったことがある人なら、設定ファイルをみれば意味が分かると思います。
 
-����ե�������Խ����ơ���ư��������Ǥ���
+設定ファイルを編集して、起動するだけです。
 
     $ ./evs_pganalyzer [/PATH/TO/evserver.ini]
     $ tail -F /var/log/EvServer/EvServer.log
 
-2. ��³��ˡ
+2. 接続方法
 
-�㤨�С�����ե������PgAnalyzer���Ԥ������ݡ��Ȥ�10080�Ȥ����ʤ�С�psql��
+例えば、設定ファイルでPgAnalyzerの待ち受けポートを10080としたならば、psqlで
 
     $ psql test_db -U testuser -p 10080 -h testserver
 
-�Τ褦�ˤ���С�test001�����С���test_db���Ф��ơ�testuser����³�Ǥ���Ϥ��Ǥ���
+のようにすれば、testserverサーバーのtest_dbに対して、testuserで接続できるはずです。
 
-�ޤ�������ե������LogLevel��1�Ȥ��ˤ��ơ������������󤬽Ф�褦�ˤ��Ƥ������������Ҥ���ʤ��Ȥ��ξ�����ǧ���Ǥ���Ǥ��礦��
+まずは設定ファイルのLogLevelを1とかにして、いろいろ情報が出るようにしておいた方が、繋がらないときの状況確認ができるでしょう。
 
-3. �ռ�
+3. 謝辞
 
 libev, OpenSSL, VSCode :-)
 	...and everyone!
