@@ -242,7 +242,6 @@ int config_str_convert(char *target, int target_len)
 			// ここでもしclose()の返り値が0以外なら、エラーとしてプログラムを終了するべきか？
 		}
 		// ログファイルを設定
-		memcpy((void *)EVS_config.log_file, (void *)value_str, strlen(value_str));
 		snprintf(log_str, MAX_LOG_LENGTH, "%s(): LogFile=%s\n", __func__, EVS_config.log_file);
 		logging(LOG_QUEUEING, LOGLEVEL_INFO, NULL, NULL, NULL, log_str, strlen(log_str));
 	}
