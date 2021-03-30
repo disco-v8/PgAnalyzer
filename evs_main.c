@@ -6,6 +6,7 @@
 // Version:
 //     0.0.16 Published on GitHUB.
 //     0.0.17 Fix Timeout.
+//     0.0.18 Fix Idle Events.
 //
 // Program:
 //     Takeshi Kaburagi/MyDNS.JP    https://www.fvg-on.net/
@@ -55,131 +56,6 @@ static const char b64lookup[128] = {
 // ----------------------------------------------------------------------
 // コード部分
 // ----------------------------------------------------------------------
-// --------------------------------
-// BASE64エンコード処理(本当はOpenSSLのEVP_EncodeBlock()を使おうと思っていたが、デコード側に問題があったので、念のためエンコードも本家ソースをしばらく流用させてもらう)
-// --------------------------------
-int
-pg_b64_encode(const char *src, int len, char *dst)
-{
-	char       *p;
-	const char *s,
-			   *end = src + len;
-	int         pos = 2;
-	unsigned int      buf = 0;
-
-	s = src;
-	p = dst;
-
-	while (s < end)
-	{
-		buf |= (unsigned char) *s << (pos << 3);
-		pos--;
-		s++;
-
-		/* write it out */
-		if (pos < 0)
-		{
-			*p++ = _base64[(buf >> 18) & 0x3f];
-			*p++ = _base64[(buf >> 12) & 0x3f];
-			*p++ = _base64[(buf >> 6) & 0x3f];
-			*p++ = _base64[buf & 0x3f];
-
-			pos = 2;
-			buf = 0;
-		}
-	}
-	if (pos != 2)
-	{
-		*p++ = _base64[(buf >> 18) & 0x3f];
-		*p++ = _base64[(buf >> 12) & 0x3f];
-		*p++ = (pos == 0) ? _base64[(buf >> 6) & 0x3f] : '=';
-		*p++ = '=';
-	}
-
-	return p - dst;
-}
-
-// --------------------------------
-// BASE64デコード処理(本当はOpenSSLのEVP_DecodeBlock()をつかおうと思っていたが、デコードデータの最後に'\0'とかを付けて長さともども返すので、そもそもデコードしたデータが元データと合致していないため使えなかった。そのうち修正されるとは思うけど)
-// --------------------------------
-int
-pg_b64_decode(const char *src, int len, char *dst)
-{
-	const char *srcend = src + len,
-			   *s = src;
-	char       *p = dst;
-	char        c;
-	int         b = 0;
-	unsigned int      buf = 0;
-	int         pos = 0,
-				end = 0;
-
-	while (s < srcend)
-	{
-		c = *s++;
-
-		/* Leave if a whitespace is found */
-		if (c == ' ' || c == '\t' || c == '\n' || c == '\r')
-			return -1;
-
-		if (c == '=')
-		{
-			/* end sequence */
-			if (!end)
-			{
-				if (pos == 2)
-					end = 1;
-				else if (pos == 3)
-					end = 2;
-				else
-				{
-					/*
-					 * Unexpected "=" character found while decoding base64
-					 * sequence.
-					 */
-					return -1;
-				}
-			}
-			b = 0;
-		}
-		else
-		{
-			b = -1;
-			if (c > 0 && c < 127)
-				b = b64lookup[(unsigned char) c];
-			if (b < 0)
-			{
-				/* invalid symbol found */
-				return -1;
-			}
-		}
-		/* add it to buffer */
-		buf = (buf << 6) + b;
-		pos++;
-		if (pos == 4)
-		{
-			*p++ = (buf >> 16) & 255;
-			if (end == 0 || end > 1)
-				*p++ = (buf >> 8) & 255;
-			if (end == 0 || end > 2)
-				*p++ = buf & 255;
-			buf = 0;
-			pos = 0;
-		}
-	}
-
-	if (pos != 0)
-	{
-		/*
-		 * base64 end sequence is invalid.  Input data is missing padding, is
-		 * truncated or is otherwise corrupted.
-		 */
-		return -1;
-	}
-
-	return p - dst;
-}
-
 // --------------------------------
 // ダンプ文字列生成処理(dump_strに対して、targetdataからtagetlenバイトのダンプ文字列を設定して返す)
 // --------------------------------
