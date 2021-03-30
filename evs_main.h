@@ -98,15 +98,6 @@ enum CLIENT_PARAM_LIST {                                                        
 								CLIENT_PARAM_END,                                           // 設定値の最後(これをfor分の最後までの判定などに使えばよい)
 };
 
-enum SERVER_SASL_LIST {                                                                     // PostgreSQLのSASL認証で送られてくるパラメータ(※相対文字列はPgSQL_server_SASL_list[])
-								SERVER_NONCE,                                               // サーバー側が指定してきたナンス
-								SERVER_BASE64SALT,                                          // サーバー側が指定してきたBASE64エンコードされたソルトキー
-								SERVER_ITERATIONS,                                          // サーバー側が指定してきたイテレーション(反復回数)
-								SERVER_VERIFYDATA,                                          // サーバー側が指定してきたベリファイデータ
-
-								SERVER_SASL_END,                                            // 設定値の最後(これをfor分の最後までの判定などに使えばよい)
-};
-
 // --------------------------------
 // 型宣言
 // --------------------------------
@@ -190,8 +181,6 @@ struct EVS_ev_pgsql_t {                                     // PostgreSQL用構�
 	void            *db_info;                               // データベース別構造体へのポインタ
 	int             recv_len;                               // PostgreSQLから受信したメッセージ長
 	char            recv_buf[MAX_RECV_BUF_LENGTH];          // PostgreSQLから受信したメッセージ
-	char            param_buf[MAX_STRING_LENGTH];           // SASL認証等で必要な各種パラメータ用バッファ
-	char            *param_info[SERVER_SASL_END];           // 各種パラメータ用ポインタの配列(各種パラメータのparam_buf内のポインタを示す)
 	TAILQ_ENTRY (EVS_ev_pgsql_t) entries;                   // 次のTAILQ構造体への接続 → man3/queue.3.html
 };
 
@@ -255,8 +244,6 @@ extern struct EVS_config_t              EVS_config;                     // シ�
 // libev 関連
 // ----------------
 extern ev_idle                          idle_message_watcher;           // アイドルオブジェクト(メッセージ用。なにもイベントがないときに呼ばれて、メッセージ解析してログ出力などする)
-extern ev_idle                          idle_client_watcher;            // アイドルオブジェクト(クライアントタイムアウト用。なにもイベントがないときに呼ばれる、監視対象イベントごとに設定しないといけない)
-////extern ev_idle                          idle_pgsql_watcher;             // アイドルオブジェクト(PostgreSQLタイムアウト用。なにもイベントがないときに呼ばれる、監視対象イベントごとに設定しないといけない)
 extern ev_io                            stdin_watcher;                  // I/O監視オブジェクト
 extern ev_timer                         timeout_watcher;                // タイマーオブジェクト
 extern ev_signal                        signal_watcher_sighup;          // シグナルオブジェクト(シグナルごとにウォッチャーを分けないといけない)
@@ -295,9 +282,6 @@ extern int                              EVS_log_mode;                   // ロ�
 // --------------------------------
 // プロトタイプ宣言
 // --------------------------------
-extern int pg_b64_encode(const char *, int , char *);                   // BASE64エンコード処理(本当はOpenSSLのEVP_EncodeBlock()を使おうと思っていたが、デコード側に問題があったので、念のためエンコードも本家ソースをしばらく流用させてもらう)
-extern int pg_b64_decode(const char *, int , char *);                   // BASE64デコード処理(本当はOpenSSLのEVP_DecodeBlock()をつかおうと思っていたが、デコードデータの最後に'\0'とかを付けて長さともども返すので、そもそもデコードしたデータが元データと合致していないため使えなかった。そのうち修正されるとは思うけど)
-
 extern char *getdumpstr(void *, int);                                   // ダンプ文字列生成処理
 extern void dump2log(int, int, struct timeval *, void *, int);          // ダンプ出力
 extern void log_queueing(int, struct EVS_ev_client_t *, struct EVS_ev_pgsql_t *, char *, int);                          // ログキューイング処理
@@ -324,9 +308,6 @@ extern int API_pgsql_server_start(struct EVS_ev_client_t *);            // サ�
 extern int API_pgsql_SSLHandshake(struct EVS_ev_pgsql_t *);             // PostgreSQL SSLハンドシェイク処理
 extern int API_pgsql_send_StartupMessage(struct EVS_ev_pgsql_t *);      // PostgreSQL StartupMessage処理 (※この関数を呼ぶ時には、this_client->param_infoに完璧なデータが入っている前提)
 extern int API_pgsql_send_PasswordMessageMD5(struct EVS_ev_pgsql_t *);  // PostgreSQL PasswordMessage(MD5)処理
-extern int API_pgsql_send_SASLInitialResponse(struct EVS_ev_pgsql_t *); // PostgreSQL SASLInitialResponse処理
-extern int API_pgsql_send_AuthenticationSASLContinue(struct EVS_ev_pgsql_t *); // PostgreSQL AuthenticationSASLContinue処理
-extern int API_pgsql_send_AuthenticationSASLFinal(struct EVS_ev_pgsql_t *);    // PostgreSQL AuthenticationSASLFinal処理
 
 // ----------------
 // テールキュー関連
