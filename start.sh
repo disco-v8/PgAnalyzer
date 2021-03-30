@@ -6,7 +6,9 @@ pkill -9 evs_pganalyzer
 rm -f /var/run/EvServer/.EvServer.sock
 rm -f /var/run/EvServer/.EvServer.pid
 rm -f /var/log/EvServer/EvServer.log
+rm -f /var/log/PgMulti/Startup.log
 
 ./evs_pganalyzer ./evserver.ini
 ps awux | grep evs_pganalyzer
+cat /var/log/PgMulti/Startup.log
 tail -F /var/log/EvServer/EvServer.log
