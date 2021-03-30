@@ -11,3 +11,4 @@ make
 rm -f /var/run/EvServer/.EvServer.sock
 rm -f /var/run/EvServer/.EvServer.pid
 rm -f /var/log/EvServer/EvServer.log
+rm -f /var/log/PgMulti/Startup.log
