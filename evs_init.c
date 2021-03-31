@@ -226,6 +226,7 @@ int INIT_openssl(void)
 		logging(LOG_DIRECT, LOGLEVEL_ERROR, NULL, NULL, NULL, log_str, strlen(log_str));
 		return init_result;
 	}
+	snprintf(log_str, MAX_LOG_LENGTH, "%s(): SSL_CTX_new(): OK.\n", __func__);
 	logging(LOG_QUEUEING, LOGLEVEL_INFO, NULL, NULL, NULL, log_str, strlen(log_str));
 
 	// SSL設定でTLSv1.2以上しか許可しない(1.1.0以降はSSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION)、でいい)
