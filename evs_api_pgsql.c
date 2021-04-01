@@ -708,10 +708,10 @@ int API_pgsql_server(struct EVS_ev_pgsql_t *this_pgsql)
 		message_info->client_ssl_status = this_client->ssl_status;          // クライアント毎のSSL接続状態
 		strcpy(message_info->client_addr_str, this_client->addr_str);       // クライアントのアドレス文字列
 
-		message_info->pgsql_socket_fd = this_pgsql->socket_fd;              // 接続してきたクライアントのファイルディスクリプタ
-		message_info->pgsql_status = this_pgsql->pgsql_status;              // クライアント毎の状態
-		message_info->pgsql_ssl_status = this_pgsql->ssl_status;            // クライアント毎のSSL接続状態
-		strcpy(message_info->pgsql_addr_str, this_pgsql->addr_str);         // クライアントのアドレス文字列
+		message_info->pgsql_socket_fd = this_pgsql->socket_fd;              // 接続したPostgreSQLのファイルディスクリプタ
+		message_info->pgsql_status = this_pgsql->pgsql_status;              // PostgreSQL毎の状態
+		message_info->pgsql_ssl_status = this_pgsql->ssl_status;            // PostgreSQL毎のSSL接続状態
+		strcpy(message_info->pgsql_addr_str, this_pgsql->addr_str);         // PostgreSQLのアドレス文字列
 
 		gettimeofday(&message_info->message_tv, NULL);                      // 現在時刻を取得してmessage_info->message_tvに格納
 
