@@ -65,7 +65,7 @@ void CLOSE_pgsql(struct ev_loop* loop, struct ev_io *watcher, int revents)
 	snprintf(log_str, MAX_LOG_LENGTH, "%s(pgsql=%d): close(): OK.\n", __func__, this_pgsql->socket_fd);
 	logging(LOG_QUEUEING, LOGLEVEL_INFO, NULL, NULL, NULL, log_str, strlen(log_str));
 
-	// クライアント用テールキューからこの接続の情報を削除する
+	// PostgreSQL用テールキューからこの接続の情報を削除する
 	TAILQ_REMOVE(&EVS_pgsql_tailq, this_pgsql, entries);
 
 	snprintf(log_str, MAX_LOG_LENGTH, "%s(pgsql=%d): TAILQ_REMOVE(EVS_client_tailq): OK.\n", __func__, this_pgsql->socket_fd);
@@ -81,7 +81,7 @@ void CLOSE_pgsql(struct ev_loop* loop, struct ev_io *watcher, int revents)
 	snprintf(log_str, MAX_LOG_LENGTH, "PostgreSQL(%s) Close.\n", db_info->hostname);
 	logging(LOG_QUEUEING, LOGLEVEL_LOG, NULL, NULL, NULL, log_str, strlen(log_str));
 
-	// この接続のクライアント用拡張構造体のメモリ領域を開放する
+	// この接続のPostgreSQL用拡張構造体のメモリ領域を開放する
 	free(this_pgsql);
 
 	return;
