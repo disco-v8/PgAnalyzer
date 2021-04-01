@@ -239,7 +239,7 @@ int INIT_openssl(void)
 	init_result = SSL_CTX_load_verify_locations(EVS_ctx, EVS_config.ssl_ca_file, NULL);
 	if (init_result != 1)
 	{
-		snprintf(log_str, MAX_LOG_LENGTH, "%s(): SSL_CTX_load_verify_locations(%s): %s\n", EVS_config.ssl_ca_file, ERR_reason_error_string(ERR_get_error()));
+		snprintf(log_str, MAX_LOG_LENGTH, "%s(): SSL_CTX_load_verify_locations(%s): %s\n", __func__, EVS_config.ssl_ca_file, ERR_reason_error_string(ERR_get_error()));
 		logging(LOG_DIRECT, LOGLEVEL_ERROR, NULL, NULL, NULL, log_str, strlen(log_str));
 		return 0;
 	}
@@ -250,7 +250,7 @@ int INIT_openssl(void)
 	init_result = SSL_CTX_use_certificate_file(EVS_ctx, EVS_config.ssl_cert_file, SSL_FILETYPE_PEM);
 	if (init_result != 1)
 	{
-		snprintf(log_str, MAX_LOG_LENGTH, "%s(): SSL_CTX_use_certificate_file(%s): %s\n", EVS_config.ssl_cert_file, ERR_reason_error_string(ERR_get_error()));
+		snprintf(log_str, MAX_LOG_LENGTH, "%s(): SSL_CTX_use_certificate_file(%s): %s\n", __func__, EVS_config.ssl_cert_file, ERR_reason_error_string(ERR_get_error()));
 	   logging(LOG_DIRECT, LOGLEVEL_ERROR, NULL, NULL, NULL, log_str, strlen(log_str));
 		return 0;
 	}
@@ -261,7 +261,7 @@ int INIT_openssl(void)
 	init_result = SSL_CTX_use_PrivateKey_file(EVS_ctx, EVS_config.ssl_key_file, SSL_FILETYPE_PEM);
 	if (init_result != 1)
 	{
-		snprintf(log_str, MAX_LOG_LENGTH, "%s(): SSL_CTX_use_PrivateKey_file(%s): %s\n", EVS_config.ssl_key_file, ERR_reason_error_string(ERR_get_error()));
+		snprintf(log_str, MAX_LOG_LENGTH, "%s(): SSL_CTX_use_PrivateKey_file(%s): %s\n", __func__, EVS_config.ssl_key_file, ERR_reason_error_string(ERR_get_error()));
 		logging(LOG_DIRECT, LOGLEVEL_ERROR, NULL, NULL, NULL, log_str, strlen(log_str));
 		return 0;
 	}
@@ -272,7 +272,7 @@ int INIT_openssl(void)
 	init_result = SSL_CTX_check_private_key(EVS_ctx);
 	if (init_result != 1)
 	{
-		snprintf(log_str, MAX_LOG_LENGTH, "%s(): SSL_CTX_check_private_key(): %s\n", ERR_reason_error_string(ERR_get_error()));
+		snprintf(log_str, MAX_LOG_LENGTH, "%s(): SSL_CTX_check_private_key(): %s\n", __func__, ERR_reason_error_string(ERR_get_error()));
 		logging(LOG_DIRECT, LOGLEVEL_ERROR, NULL, NULL, NULL, log_str, strlen(log_str));
 		return 0;
 	}
