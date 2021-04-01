@@ -993,7 +993,7 @@ static void CB_pgsqlrecv(struct ev_loop* loop, struct ev_io *watcher, int revent
 	// API関連
 	// --------------------------------
 	// API開始処理(PostgreSQL処理分岐)
-	socket_result = API_pgsql_server(this_pgsql);           // この関数はPostgreSQL用なので、api_start()を経由せず、直接API_pgsql()を呼んでる
+	socket_result = API_pgsql_server(this_pgsql);           // この関数はPostgreSQL用なので、api_start()を経由せず、直接API_pgsql_server()を呼んでる
 
 	// APIの処理結果がエラー(=-1)だったら(切断処理をする)
 	if (socket_result != 0)
