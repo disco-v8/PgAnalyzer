@@ -475,7 +475,7 @@ int API_pgsql_server_decodestartresponse(struct EVS_ev_pgsql_t *this_pgsql, char
 			// 標準ログに出力
 			snprintf(log_str, MAX_LOG_LENGTH, "PostgreSQL -> SSLRequest REJECTED.\n");
 			logging(LOG_QUEUEING, LOGLEVEL_LOG, NULL, NULL, NULL, log_str, strlen(log_str));
-			// PostgreSQL StartupMessage送信処理 (※この関数を呼ぶ時には、this_client->param_infoに完璧なデータが入っている前提)
+			// PostgreSQL StartupMessage送信処理
 			api_result = API_pgsql_send_StartupMessage(this_pgsql);
 			// 戻る
 			return api_result;
@@ -1608,7 +1608,7 @@ int API_pgsql_server_start_unix(struct EVS_ev_client_t *this_client)
 	snprintf(log_str, MAX_LOG_LENGTH, "Postgresql Connected. (%s)\n", this_pgsql->socket_address.sa_un.sun_path);
 	logging(LOG_QUEUEING, LOGLEVEL_LOG, NULL, NULL, NULL, log_str, strlen(log_str));
 
-	// PostgreSQL StartupMessage送信処理 (※この関数を呼ぶ時には、this_client->param_infoに完璧なデータが入っている前提)
+	// PostgreSQL StartupMessage送信処理
 	api_result = API_pgsql_send_StartupMessage(this_pgsql);
 
 	return api_result;
