@@ -1510,7 +1510,7 @@ int API_pgsql_server_start_inet(struct EVS_ev_client_t *this_client)
 	// --------------------------------
 	// libev 処理
 	// --------------------------------
-	// クライアント別設定用構造体ポインタのI/O監視オブジェクトに対して、コールバック処理とソケットファイルディスクリプタ、そしてイベントのタイプを設定する
+	// PostgreSQL別設定用構造体ポインタのI/O監視オブジェクトに対して、コールバック処理とソケットファイルディスクリプタ、そしてイベントのタイプを設定する
 	ev_io_init(&this_pgsql->io_watcher, CB_pgsqlrecv, this_pgsql->socket_fd, EV_READ);
 	ev_io_start(EVS_loop, &this_pgsql->io_watcher);
 	snprintf(log_str, MAX_LOG_LENGTH, "%s(): ev_io_init(CB_pgsqlrecv, pgsql=%d, EV_READ): OK.\n", __func__, this_pgsql->socket_fd);
@@ -1595,7 +1595,7 @@ int API_pgsql_server_start_unix(struct EVS_ev_client_t *this_client)
 	// --------------------------------
 	// libev 処理
 	// --------------------------------
-	// クライアント別設定用構造体ポインタのI/O監視オブジェクトに対して、コールバック処理とソケットファイルディスクリプタ、そしてイベントのタイプを設定する
+	// PostgreSQL別設定用構造体ポインタのI/O監視オブジェクトに対して、コールバック処理とソケットファイルディスクリプタ、そしてイベントのタイプを設定する
 	ev_io_init(&this_pgsql->io_watcher, CB_pgsqlrecv, this_pgsql->socket_fd, EV_READ);
 	ev_io_start(EVS_loop, &this_pgsql->io_watcher);
 	snprintf(log_str, MAX_LOG_LENGTH, "%s(): ev_io_init(CB_pgsqlrecv, pgsql=%d, EV_READ): OK.\n", __func__, this_pgsql->socket_fd);
