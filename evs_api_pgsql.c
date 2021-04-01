@@ -1027,8 +1027,6 @@ int API_pgsql_server_send(struct EVS_ev_pgsql_t *this_pgsql, unsigned char *mess
 	int                             api_result = 0;
 	char                            log_str[MAX_LOG_LENGTH];
 
-	struct EVS_ev_client_t          *this_client = (struct EVS_ev_client_t *)this_pgsql->client_info;
-
 	// ----------------
 	// 非SSL通信(=0)なら
 	// ----------------
@@ -1086,7 +1084,6 @@ int API_pgsql_send_PasswordMessageMD5(struct EVS_ev_pgsql_t *this_pgsql)
 	int                             api_result = 0;
 	char                            log_str[MAX_LOG_LENGTH];
 
-	struct EVS_ev_client_t          *this_client = (struct EVS_ev_client_t *)this_pgsql->client_info;
 	struct EVS_db_t                 *db_info = (struct EVS_db_t *)this_pgsql->db_info;
 
 	char                            *hash_type = {"md5"};               // ハッシュ化タイプ("md5", "sha256"など)
@@ -1192,14 +1189,13 @@ int API_pgsql_send_PasswordMessageMD5(struct EVS_ev_pgsql_t *this_pgsql)
 }
 
 // --------------------------------
-// PostgreSQL StartupMessage送信処理 (※この関数を呼ぶ時には、this_client->param_infoに完璧なデータが入っている前提)
+// PostgreSQL StartupMessage送信処理
 // --------------------------------
 int API_pgsql_send_StartupMessage(struct EVS_ev_pgsql_t *this_pgsql)
 {
 	int                             api_result = 0;
 	char                            log_str[MAX_LOG_LENGTH];
 
-	struct EVS_ev_client_t          *this_client = (struct EVS_ev_client_t *)this_pgsql->client_info;
 	struct EVS_db_t                 *db_info = (struct EVS_db_t *)this_pgsql->db_info;
 
 	char                            pgsql_message[MAX_SIZE_1K] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, };
@@ -1369,7 +1365,7 @@ int API_pgsql_SSLHandshake(struct EVS_ev_pgsql_t *this_pgsql)
 			this_pgsql->ssl_status = 2;
 			snprintf(log_str, MAX_LOG_LENGTH, "%s(pgsql=%d): SSL/TLS handshake OK.\n", __func__, this_pgsql->socket_fd);
 			logging(LOG_QUEUEING, LOGLEVEL_DEBUG, NULL, NULL, NULL, log_str, strlen(log_str));
-			// PostgreSQL StartupMessage送信処理 (※この関数を呼ぶ時には、this_client->param_infoに完璧なデータが入っている前提)
+			// PostgreSQL StartupMessage送信処理
 			api_result = API_pgsql_send_StartupMessage(this_pgsql);
 			// 戻る
 			return api_result;
