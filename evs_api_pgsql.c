@@ -514,11 +514,11 @@ int API_pgsql_server_decodestartresponse(struct EVS_ev_pgsql_t *this_pgsql, char
 			logging(LOG_QUEUEING, LOGLEVEL_LOG, NULL, NULL, NULL, log_str, strlen(log_str));
 			break;
 		case 'R':                                                       // 0x52 : R ... OKか、特定の認証が必要かはメッセージ内容による(B)
-			// クライアント毎の状態が、1:開始メッセージ応答待ちでないなら
+			// PostgreSQL毎の状態が、1:開始メッセージ応答待ちでないなら
 			if (this_pgsql->pgsql_status != 1)
 			{
 				// エラー
-				snprintf(log_str, MAX_LOG_LENGTH, "%s(pgsql=%d): Illegal Authentication Response!? (client_status=%d)\n", __func__, this_pgsql->socket_fd, this_client->client_status);
+				snprintf(log_str, MAX_LOG_LENGTH, "%s(pgsql=%d): Illegal Authentication Response!? (pgsql_status=%d)\n", __func__, this_pgsql->socket_fd, this_pgsql->pgsql_status);
 				logging(LOG_DIRECT, LOGLEVEL_ERROR, NULL, NULL, NULL, log_str, strlen(log_str));
 				// 戻る
 				return -1;
