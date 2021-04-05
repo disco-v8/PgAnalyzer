@@ -431,8 +431,6 @@ int API_pgsql_server_decodestartresponse(struct EVS_ev_pgsql_t *this_pgsql, char
 	int                             api_result = 0;
 	char                            log_str[MAX_LOG_LENGTH];
 
-	struct EVS_ev_client_t          *this_client = (struct EVS_ev_client_t *)this_pgsql->client_info;
-
 	unsigned char                   message_type = message_ptr[0];
 	unsigned char                   *target_ptr;
 
