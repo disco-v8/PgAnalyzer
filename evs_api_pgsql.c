@@ -1225,8 +1225,11 @@ int API_pgsql_send_StartupMessage(struct EVS_ev_pgsql_t *this_pgsql)
 	// コピー先ポインタを移動(\0分を忘れずに)
 	target_ptr += strlen(target_ptr) + 1;
 	strncpy(target_ptr, EVS_NAME, strlen(EVS_NAME));
-	// コピー先ポインタを移動(\0分を忘れずに)
-	target_ptr += strlen(target_ptr) + 1;
+	// コピー先ポインタを移動
+	target_ptr += strlen(EVS_NAME);
+	// \0を追加(EVS_NAMEには\0がないので)
+	*target_ptr = 0x00;
+	target_ptr ++;
 
 	// メッセージ長を設定(StartupMessageは0x00,0x00で終わる事!!)
 	message_len = target_ptr - pgsql_message + 1;
