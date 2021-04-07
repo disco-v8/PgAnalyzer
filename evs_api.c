@@ -352,9 +352,6 @@ int API_pgsql_client(struct EVS_ev_client_t *this_client)
 	int                             api_result = 0;
 	char                            log_str[MAX_LOG_LENGTH];
 
-	struct EVS_ev_pgsql_t           *this_pgsql = this_client->pgsql_info;
-	struct EVS_db_t                 *db_info = (struct EVS_db_t *)this_pgsql->db_info;
-
 	// とりあえず表示する
 	snprintf(log_str, MAX_LOG_LENGTH, "%s(fd=%d): START! client_status=%d\n", __func__, this_client->socket_fd, this_client->client_status);
 	logging(LOG_QUEUEING, LOGLEVEL_INFO, NULL, NULL, NULL, log_str, strlen(log_str));
