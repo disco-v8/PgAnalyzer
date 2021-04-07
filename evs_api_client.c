@@ -234,11 +234,7 @@ int API_pgsql_client_query(struct EVS_ev_client_t *this_client)
 	struct EVS_db_t                 *db_info = (struct EVS_db_t *)this_pgsql->db_info;
 
 	char                            *message_ptr = this_client->recv_buf;
-
-	unsigned char                   message_type = 0;
 	unsigned int                    message_len = 0;
-
-	unsigned char                   *target_ptr;
 
 	// ------------------------------------
 	// クエリキューイング処理　※メッセージをその都度解析していたら遅くなるので、いったん接続状態になったら、メッセージをキューに入れて後で解析する
