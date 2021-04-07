@@ -512,7 +512,7 @@ int API_pgsql_server_decodestartresponse(struct EVS_ev_pgsql_t *this_pgsql, char
 			logging(LOG_QUEUEING, LOGLEVEL_LOG, NULL, NULL, NULL, log_str, strlen(log_str));
 			break;
 		case 'R':                                                       // 0x52 : R ... OKか、特定の認証が必要かはメッセージ内容による(B)
-			// PostgreSQL毎の状態が、1:開始メッセージ応答待ちでないなら
+			// PostgreSQL毎の状態が、1:接続開始でないなら
 			if (this_pgsql->pgsql_status != 1)
 			{
 				// エラー
