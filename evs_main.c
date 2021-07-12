@@ -582,12 +582,6 @@ int main (int argc, char *argv[])
 		// ----------------
 		ev_run(EVS_loop, 0);
 	}
-	// ----------------
-	// 作成したイベントループの破棄
-	// ----------------
-	ev_loop_destroy(EVS_loop);
-	snprintf(log_str, MAX_LOG_LENGTH, "%s(): ev_loop_destroy(): Go!\n", __func__);          // daemon(0, 0): を呼ぶ前にログを出力
-	logging(LOG_QUEUEING, LOGLEVEL_INFO, NULL, NULL, NULL, log_str, strlen(log_str));
 
 	// --------------------------------
 	// 終了処理
@@ -596,12 +590,19 @@ int main (int argc, char *argv[])
 	snprintf(log_str, MAX_LOG_LENGTH, "%s(): CLOSE_all(): Go!\n", __func__);                // daemon(0, 0): を呼ぶ前にログを出力
 	logging(LOG_QUEUEING, LOGLEVEL_INFO, NULL, NULL, NULL, log_str, strlen(log_str));
 
-	// ログファイル名の領域を最後に解放
-	free(EVS_config.log_file);
+	// ----------------
+	// 作成したイベントループの破棄
+	// ----------------
+	ev_loop_destroy(EVS_loop);
+	snprintf(log_str, MAX_LOG_LENGTH, "%s(): ev_loop_destroy(): Go!\n", __func__);          // daemon(0, 0): を呼ぶ前にログを出力
+	logging(LOG_QUEUEING, LOGLEVEL_INFO, NULL, NULL, NULL, log_str, strlen(log_str));
 
 	// 標準ログに出力
 	snprintf(log_str, MAX_LOG_LENGTH, "Stop.\n");
 	logging(LOG_QUEUEING, LOGLEVEL_LOG, NULL, NULL, NULL, log_str, strlen(log_str));
+
+	// ログファイル名の領域を最後に解放
+	free(EVS_config.log_file);
 
 	return 0;
 }
