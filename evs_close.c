@@ -164,6 +164,9 @@ int CLOSE_all(void)
 	struct EVS_db_t                 *db_list;                           // データベース別設定用構造体ポインタ
 	struct EVS_port_t               *listen_port;                       // ポート別設定用構造体ポインタ
 
+	// ログ出力モードをLOG_DIRECTに変更
+	EVS_log_mode = LOG_DIRECT;
+
 	// --------------------------------
 	// PostgreSQL別クローズ処理
 	// --------------------------------
