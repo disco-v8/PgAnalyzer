@@ -1,6 +1,9 @@
 PgAnalyzer
 =========
 
+##This project has migrated to PgAnalyzerR, which has been rewritten in Rust.
+##Please do not use this version, as it is outdated.
+
 PgAnalyzer is Protocol Analyzer for PostgreSQL. Uses libev and OpenSSL etc. Written in C language.
 
 Sources, bug tracking: <https://github.com/disco-v8/PgAnalyzer>
